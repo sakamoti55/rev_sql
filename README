@@ -1,0 +1,40 @@
+-- Active: 1728409624185@@127.0.0.1@5432@students
+-dockernetwork 作成(もうしなくてよい)-
+docker network create dblecture-network
+
+-データベースサーバーの起動-
+docker run --rm --name dblecture --network dblecture-network -p 5432:5432 -v dblecture:/var/lib/postgresql/data -e POSTGRES_PASSWORD=password postgres:12.11
+
+
+-ファイルからのSQLの実行-
+docker run -it --rm --network dblecture-network -v ${pwd}:/sql -e PGPASSWORD=password postgres:12.11 psql -h dblecture -U postgres -f /sql/ファイル名.sql
+
+-ファイルに保存したsql文で実行-
+docker run -it --rm --network dblecture-network -v ${pwd}:/sql -e PGPASSWORD=password postgres:12.11 psql -h dblecture -U postgres -d students -f /sql/{pass}.sql
+
+-データベースサーバーへのアクセス-
+docker run -it --rm --network dblecture-network -v ${pwd}:/sql -e PGPASSWORD=password postgres:12.11 psql -h dblecture -U postgres -d ファイル名
+
+
+# クエリの順序
+
+# FROM
+# テーブルの結合やデータの取得を行う。
+
+# WHERE
+# データのフィルタリング（グループ化の前）。
+
+# GROUP BY
+# データをグループ化する。
+
+# 集計関数の計算（例：AVG、SUMなど）
+# グループごとの集計を実行。
+
+# HAVING
+# 集計後のデータをフィルタリングする。
+
+# SELECT
+# 結果セットの列を選択する。
+
+# ORDER BY
+# 結果を並び替える。

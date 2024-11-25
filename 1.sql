@@ -1,4 +1,4 @@
--- Active: 1728631457135@@127.0.0.1@5432@students
+-- Active: 1728409624185@@127.0.0.1@5432@students
 
 -- 1
 SELECT *
@@ -78,4 +78,93 @@ SELECT *
 FROM 生徒データ
 ORDER BY 生徒番号;
 
-DELETE 
+-- 15
+SELECT COUNT(DISTINCT(クラブ))
+FROM クラブデータ;
+
+-- 16
+SELECT *
+FROM 生徒データ
+WHERE 住所 = '伊倉町' OR 住所 = '宇治町';
+
+-- 17
+SELECT *
+FROM 生徒データ
+WHERE 名前 LIKE '%子'
+;
+
+-- 18
+SELECT 住所
+FROM 生徒データ
+WHERE 住所 LIKE '__町'
+;
+
+-- 19
+SELECT クラブ,COUNT(*)
+FROM クラブデータ
+GROUP BY クラブ
+ORDER BY COUNT(*) DESC
+;
+
+-- 20
+SELECT クラブ,COUNT(*)
+FROM クラブデータ
+GROUP BY クラブ
+HAVING COUNT(*) >= 10
+ORDER BY COUNT(*) DESC
+;
+
+-- 21
+SELECT *
+FROM 生徒成績データ
+WHERE 数学 >= (SELECT AVG(数学) FROM 生徒成績データ)
+;
+
+-- TEST
+SELECT AVG(数学)
+FROM 生徒成績データ;
+
+-- 22
+SELECT 名前,数学
+FROM 生徒データ
+JOIN 生徒成績データ ON 生徒データ.生徒番号=生徒成績データ.生徒番号
+WHERE 数学 >= (SELECT AVG(数学) FROM 生徒成績データ)
+;
+
+-- 23
+SELECT AVG(外国語)
+FROM 生徒成績データ
+JOIN 選択科目データ ON 生徒成績データ.生徒番号=選択科目データ.生徒番号
+GROUP BY 文理選択
+;
+
+-- 23 CASEWHEN
+SELECT 
+AVG(CASE WHEN 文理選択 = '文系' THEN 外国語 END) AS 文系,
+AVG(CASE WHEN 文理選択 = '理系' THEN 外国語 END) AS 理系
+FROM 選択科目データ
+JOIN 生徒成績データ ON 選択科目データ.生徒番号 = 生徒成績データ.生徒番号
+;
+
+-- 24
+SELECT 出身中学,AVG(国語) AS T
+FROM 生徒データ
+JOIN 生徒成績データ ON 生徒データ.生徒番号 = 生徒成績データ.生徒番号
+GROUP BY 出身中学
+-- AVG(国語)をTで置き換えられない理由は、HAVINGの後にSELECTが行われるため、
+-- SELCT文内のエイリアスであるTはまだ使用できないから
+-- エイリアス(alias)は、一時的な別名を付与する仕組み
+HAVING AVG(国語) >= 90
+ORDER BY T DESC
+; 
+
+-- TEST
+SELECT 出身中学, T
+FROM (
+  SELECT 出身中学, AVG(国語) AS T
+  FROM 生徒データ
+  JOIN 生徒成績データ ON 生徒データ.生徒番号 = 生徒成績データ.生徒番号
+  GROUP BY 出身中学
+) AS 中間テーブル
+WHERE T >= 90
+ORDER BY T DESC;
